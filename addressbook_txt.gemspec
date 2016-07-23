@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'addressbook_txt'
-  s.version = '0.1.0'
+  s.version = '0.1.1'
   s.summary = 'Stores address book entries in a plain text file'
   s.authors = ['James Robertson']
   s.files = Dir['lib/addressbook_txt.rb']

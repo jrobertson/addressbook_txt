@@ -12,7 +12,7 @@ require 'fileutils'
 #
 #  [x] create a new addressbook.txt file
 #  [x] read an existing addressbook.txt file
-#  [ ] search each entry using a keyword
+#  [x] search each entry using a keyword
 #  [ ] archive address entries on an annual basis
 #  [ ] search the archive using a keyword
 
@@ -47,6 +47,10 @@ class AddressbookTxt
     File.write File.join(@path, filename), s
     @dx.save File.join(@path, filename.sub(/\.txt$/,'.xml'))
         
+  end
+  
+  def search(keyword)
+    dx.all.select {|r| r.x =~ /#{keyword}/i}
   end
   
   def to_s()
