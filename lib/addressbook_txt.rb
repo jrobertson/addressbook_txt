@@ -5,6 +5,7 @@
 require 'date'
 require 'dynarex'
 require 'fileutils'
+require 'rexle-diff'
 
 
 
@@ -45,7 +46,12 @@ class AddressbookTxt
 
     s = File.basename(filename) + "\n" + dx_to_s(@dx).lines[1..-1].join
     File.write File.join(@path, filename), s
-    @dx.save File.join(@path, filename.sub(/\.txt$/,'.xml'))
+    
+    xml_file = File.join(@path, filename.sub(/\.txt$/,'.xml'))
+    xml_buffer = File.read xml_file
+    doc = RexleDiff.new(xml_buffer, @dx.to_xml, fuzzy_match: true).to_doc
+    
+    File.write xml_file, doc.xml(pretty: true)
         
   end
   
