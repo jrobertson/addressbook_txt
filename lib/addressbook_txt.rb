@@ -15,31 +15,30 @@ require 'rexle-diff'
 #  [x] read an existing addressbook.txt file
 #  [x] search each entry using a keyword
 #  [x] archive address entries on an annual basis
-#  [ ] search the archive using a keyword
+#  [x] search the archive using a keyword
 
 
 
 class AddressbookTxt
   
-  attr_reader :to_s
+  attr_reader :to_s, :dx
 
-  def initialize(filename='addressbook.txt', path: '.')
+  def initialize(filename='addressbook.txt', path: File.dirname(filename))        
     
-    @filename, @path = filename, path
+    @filename, @path = File.basename(filename), File.expand_path(path)
     
-    fpath = File.join(path, filename)
+    fpath = File.join(@path, @filename)
     
-    if File.exists?(fpath) then
+    @dx = if File.exists?(fpath) then
 
-      @dx = import_to_dx(File.read(fpath))    
-          
+      s = File.read(fpath)
+
+      File.extname(@filename) == '.txt' ? import_to_dx(s) :  Dynarex.new(s)
+
     else
-      @dx = new_dx    
+      new_dx()
     end
-  end
-
-  def dx()
-    @dx
+    
   end
   
   def save(filename=@filename)
@@ -67,7 +66,22 @@ class AddressbookTxt
   end
   
   def search(keyword)
-    dx.all.select {|r| r.x =~ /#{keyword}/i}
+
+    found = dx.all.select {|r| r.x =~ /#{keyword}/i}
+
+    if found.empty? then
+      
+      # search the archive
+      
+      archive_files = File.join(@path,'archive','addressbook-*.xml')
+
+      found = Dir.glob(archive_files).sort.reverse[1..-1].flat_map do |file|
+        AddressbookTxt.new(file).search keyword
+      end
+    end
+    
+    return found
+    
   end
   
   def to_s()
@@ -107,5 +121,4 @@ class AddressbookTxt
 
   end
   
-
 end
