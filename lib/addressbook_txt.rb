@@ -14,7 +14,7 @@ require 'rexle-diff'
 #  [x] create a new addressbook.txt file
 #  [x] read an existing addressbook.txt file
 #  [x] search each entry using a keyword
-#  [ ] archive address entries on an annual basis
+#  [x] archive address entries on an annual basis
 #  [ ] search the archive using a keyword
 
 
@@ -48,10 +48,21 @@ class AddressbookTxt
     File.write File.join(@path, filename), s
     
     xml_file = File.join(@path, filename.sub(/\.txt$/,'.xml'))
-    xml_buffer = File.read xml_file
-    doc = RexleDiff.new(xml_buffer, @dx.to_xml, fuzzy_match: true).to_doc
     
-    File.write xml_file, doc.xml(pretty: true)
+    if File.exists? xml_file then
+      xml_buffer = File.read xml_file
+      doc = RexleDiff.new(xml_buffer, @dx.to_xml, fuzzy_match: true).to_doc
+      
+      File.write xml_file, doc.xml(pretty: true)
+    else
+      File.write xml_file, @dx.to_xml(pretty: true)
+    end
+    
+    # write the file to the archive
+    archive_file = File.join(@path,'archive','addressbook-' + \
+                             Date.today.year.to_s + '.xml')
+    FileUtils.mkdir_p File.dirname(archive_file)
+    FileUtils.cp xml_file, archive_file
         
   end
   
